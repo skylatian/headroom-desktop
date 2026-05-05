@@ -1,6 +1,6 @@
 {
   "name": "headroom-desktop",
-  "version": "0.3.9",
+  "version": "0.3.10",
   "private": true,
   "type": "module",
   "scripts": {
@@ -36,8 +36,9 @@
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.2",
     "jsdom": "^29.0.2",
+    "postcss": "^8.5.10",
     "typescript": "^5.6.3",
-    "vite": "^8.0.3",
+    "vite": "^8.0.10",
     "vitest": "^4.1.2"
   }
 }
