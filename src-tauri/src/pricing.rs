@@ -102,6 +102,7 @@ impl IdentityPayload {
         &self,
         mut builder: reqwest::blocking::RequestBuilder,
     ) -> reqwest::blocking::RequestBuilder {
+        builder = builder.header("X-Headroom-App-Version", env!("CARGO_PKG_VERSION"));
         builder = builder.header("X-Headroom-Device-Id", &self.device_id);
         if let Some(value) = self.chopratejas_instance_id.as_deref() {
             builder = builder.header("X-Headroom-Chopratejas-Id", value);
@@ -1475,8 +1476,9 @@ fn reconcile_local_state_with_server(state: &AppState) -> Result<LocalPricingSta
 }
 
 fn fetch_grace_start(identity: &IdentityPayload) -> Result<GraceResponse, String> {
-    let response = http_client()?
-        .post(api_url("desktop/grace/start"))
+    let builder = http_client()?.post(api_url("desktop/grace/start"));
+    let response = identity
+        .apply_headers(builder)
         .json(identity)
         .send()
         .map_err(|err| format!("grace/start request failed: {err}"))?;
@@ -1733,6 +1735,23 @@ mod tests {
         assert_eq!(
             req.headers().get("X-Headroom-Claude-Plan").unwrap(),
             "max20x"
+        );
+    }
+
+    #[test]
+    fn apply_headers_sets_app_version() {
+        let identity = IdentityPayload {
+            device_id: "abc123".into(),
+            ..Default::default()
+        };
+        let client = reqwest::blocking::Client::new();
+        let req = identity
+            .apply_headers(client.get("http://example.test"))
+            .build()
+            .unwrap();
+        assert_eq!(
+            req.headers().get("X-Headroom-App-Version").unwrap(),
+            env!("CARGO_PKG_VERSION")
         );
     }
 
